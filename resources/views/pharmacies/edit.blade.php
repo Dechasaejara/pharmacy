@@ -29,10 +29,10 @@
 
             <!-- Location -->
             <div class="mb-4">
-                <label for="location" class="block text-gray-700 font-medium mb-2">Location</label>
-                <textarea id="location" name="location" rows="4"
-                          class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-green-500 @error('location') border-red-500 @enderror">{{ old('location', $pharmacy->location) }}</textarea>
-                @error('location')
+                <label for="address" class="block text-gray-700 font-medium mb-2">Address</label>
+                <textarea id="address" name="address" rows="4"
+                          class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-green-500 @error('address') border-red-500 @enderror">{{ old('address', $pharmacy->address) }}</textarea>
+                @error('address')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>

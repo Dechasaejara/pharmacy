@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
+            $table->text('fullname')->nullable(); //
             $table->text('bio')->nullable(); // Short biography
             $table->string('picture')->nullable(); // Profile picture URL
-            $table->enum('role', ['User', 'Admin', 'Pharmacist'])->default('User'); // User role
+            $table->enum('role', ['User', 'Admin', 'Pharmacist', 'Manager'])->default('User'); // User role
             $table->string('phone')->nullable(); // Phone number
             $table->string('address')->nullable(); // Address
             $table->date('date_of_birth')->nullable(); // Date of birth
@@ -29,6 +30,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreignId('user_id')->default(1)->unique()->constrained('users')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('pharmacy_id')->nullable()->constrained('pharmacies')->onUpdate('cascade')->onDelete('cascade');
+            // $table->foreignId('pharmacy_id')->default(1)->nullable()->constrained('pharmacies')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

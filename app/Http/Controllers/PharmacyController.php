@@ -15,6 +15,8 @@ class PharmacyController extends Controller
     public function index()
     {
         $pharmacies = Pharmacy::latest()->paginate(7);
+        $pharmacies = Pharmacy::with('pharmacists')->latest()->paginate(7);
+        // dd($pharmacies);
         return view('pharmacies.index', ['pharmacies' => $pharmacies]);
     }
 
@@ -34,7 +36,7 @@ class PharmacyController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'license_number' => 'required|string|max:255|unique:pharmacies,license_number',
-            'location' => 'nullable|string|max:500',
+            'address' => 'nullable|string|max:500',
             'picture' => 'nullable|image|max:2048',
             'phone' => 'nullable|string|max:15',
             'email' => 'nullable|email|max:255|unique:pharmacies,email',
@@ -49,7 +51,7 @@ class PharmacyController extends Controller
             $validated['picture'] = $request->file('picture')->store('pharmacies', 'public');
         }
 
-        Pharmacy::create(['user_id' => Auth::id(), ...$validated]);
+        Pharmacy::create(['profile_id' => Auth::user()->profile->id, ...$validated]);
 
         return redirect()->route('pharmacies.index')->with('success', 'Pharmacy added successfully.');
     }
@@ -78,7 +80,7 @@ class PharmacyController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'license_number' => 'required|string|max:255|unique:pharmacies,license_number,' . $pharmacy->id,
-            'location' => 'nullable|string|max:500',
+            'address' => 'nullable|string|max:500',
             'picture' => 'nullable|image|max:2048',
             'phone' => 'nullable|string|max:15',
             'email' => 'nullable|email|max:255|unique:pharmacies,email,' . $pharmacy->id,

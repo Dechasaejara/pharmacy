@@ -4,20 +4,21 @@
         <h1 class="text-2xl font-bold mb-6">Prescription Management</h1>
 
         <!-- Add Prescription Button -->
-        <div class="mb-4">
+        {{-- <div class="mb-4">
             <a href="{{ route('prescriptions.create') }}"
                 class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
                 Add New Prescription
             </a>
-        </div>
+        </div> --}}
 
         <!-- Prescription Table -->
-        <div class="overflow-x-auto bg-white shadow-md rounded">
+        <div class="overflow-x-scroll bg-white shadow-md rounded">
             <table class="min-w-full table-auto border-collapse border border-gray-300">
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-4 py-2 border border-gray-300 text-left">ID</th>
-                        <th class="px-4 py-2 border border-gray-300 text-left">Profile ID</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Name</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Patient ID</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Status</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Medical Notes</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Issued Date</th>
@@ -29,19 +30,22 @@
                     @foreach ($prescriptions as $prescription)
                         <tr class="hover:bg-gray-50">
                             <td class="px-4 py-2 border border-gray-300">{{ $prescription->id }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $prescription->unique_name }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $prescription->profile_id }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $prescription->status }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $prescription->medical_notes }}</td>
-                            <td class="px-4 py-2 border border-gray-300">{{ $prescription->issued_date }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $prescription->created_at }}</td>
                             <td class="px-4 py-2 border border-gray-300">
-                                @if ($prescription->images)
-                                    @foreach ($prescription->images as $image)
-                                        <img src="{{ asset('storage/' . $image) }}" alt="Prescription Image"
-                                            class="w-16 h-16 object-cover rounded">
-                                    @endforeach
-                                @else
-                                    <span class="text-gray-500">No Images</span>
-                                @endif
+                                @if ($prescription->image)
+                                <div class="image-modal-trigger cursor-pointer" style="display: inline-block;">
+                                    <img src="{{ asset('storage/' . $prescription->image) }}" 
+                                         alt="Prescription Image"
+                                         class="w-16 h-16 object-cover rounded hover:opacity-75">
+                                </div>
+                                <x-image-modal image="{{ asset('storage/' . $prescription->image) }}"/>
+                            @else
+                                <span class="text-gray-500">No Images</span>
+                            @endif
                             </td>
                             <td class="px-4 py-2 border border-gray-300 text-center">
                                 <a href="{{ route('prescriptions.edit', $prescription->id) }}"
@@ -64,5 +68,6 @@
                 {{ $prescriptions->links() }}
             </div>
         </div>
+    
     </div>
 </x-dashboardLayout>

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('profile_id')->default(1);
             $table->unsignedBigInteger('pharmacy_id')->default(1);
             $table->decimal('total_amount', 10, 2)->default(0.1);
-            $table->string('status')->default('pending');
+            $table->enum('status', ['pending', 'approved', 'rejected', 'accepted'])->default('pending');
             $table->date('valid_until')->nullable(); // Expiry date of the quotation
             $table->text('notes')->nullable();
             $table->timestamps();
@@ -25,6 +25,7 @@ return new class extends Migration
             $table->foreign('prescription_id')->references('id')->on('prescriptions')->onDelete('cascade');
             $table->foreign('profile_id')->references('id')->on('profiles')->onDelete('cascade');
             $table->foreign('pharmacy_id')->references('id')->on('pharmacies')->onDelete('cascade');
+            $table->unique(['pharmacy_id', 'prescription_id'], 'unique_pharmacy_prescription');
         });
     }
 

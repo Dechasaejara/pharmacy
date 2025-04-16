@@ -13,17 +13,14 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('quotation_id')->default(1);
-            $table->unsignedBigInteger('profile_id')->default(1);
-            $table->unsignedBigInteger('pharmacy_id')->default(1);
             $table->decimal('total_amount', 10, 2)->default(0.1);
-            $table->string('status')->default('pending');
+            $table->enum('status', ['pending', 'approved', 'rejected', 'accepted'])->default('pending');
             $table->dateTime('completed_at')->nullable();
             $table->timestamps();
 
-            $table->foreign('quotation_id')->references('id')->on('quotations')->onDelete('cascade');
-            $table->foreign('profile_id')->references('id')->on('profiles')->onDelete('cascade');
-            $table->foreign('pharmacy_id')->references('id')->on('pharmacies')->onDelete('cascade');
+            $table->foreignId('quotation_id')->default(1)->unique()->constrained('quotations')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('profile_id')->default(1)->constrained('profiles')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('pharmacy_id')->default(1)->constrained('pharmacies')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

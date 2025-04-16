@@ -23,7 +23,7 @@
                         <th class="px-4 py-2 border border-gray-300 text-left">ID</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Name</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">License Number</th>
-                        <th class="px-4 py-2 border border-gray-300 text-left">Location</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Address</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Phone</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Email</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Picture</th>
@@ -41,7 +41,7 @@
                             <td class="px-4 py-2 border border-gray-300">{{ $pharmacy->id }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $pharmacy->name }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $pharmacy->license_number }}</td>
-                            <td class="px-4 py-2 border border-gray-300">{{ $pharmacy->location }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $pharmacy->address }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $pharmacy->phone }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $pharmacy->email }}</td>
                             <td class="px-4 py-2 border border-gray-300">

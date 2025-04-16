@@ -27,7 +27,7 @@ class Quotation extends Model
 
     public function pharmacist(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Profile::class);
     }
 
     public function pharmacy(): BelongsTo

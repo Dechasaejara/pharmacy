@@ -16,7 +16,7 @@ class TransactionFactory extends Factory
             'profile_id' => \App\Models\Profile::factory(),
             'pharmacy_id' => \App\Models\Pharmacy::factory(),
             'total_amount' => fake()->randomFloat(2, 50, 500),
-            'status' => fake()->randomElement(['completed', 'pending', 'failed']),
+            'status' => fake()->randomElement(['pending', 'approved', 'rejected', 'accepted']),
             'completed_at' => fake()->optional()->dateTime(),
         ];
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->default('Test'); // Pharmacy name
             $table->string('license_number')->unique()->nullable(); // License number
-            $table->string('location')->nullable(); // General location description
+            $table->string('address')->nullable(); // General location description
             $table->string('picture')->nullable(); // Pharmacy picture URL
             $table->string('phone')->nullable(); // Contact phone number
             $table->string('email')->nullable(); // Contact email
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('state')->nullable(); // State or region
             $table->string('city')->nullable(); // City
             $table->timestamps();
-            $table->foreignId('user_id')->default(1)->unique()->constrained('users')->onUpdate('cascade')->onDelete('cascade');
+            // $table->foreignId('profile_id')->default(1)->constrained('profiles')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

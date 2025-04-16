@@ -13,7 +13,12 @@ class PrescriptionController extends Controller
      */
     public function index()
     {
-        $prescriptions = Prescription::latest()->paginate(7);
+        $profile = Auth::user()->profile;
+        $query = Prescription::query();
+        if ($profile->role === 'User') {
+            $query->where('profile_id', $profile->id);
+        }
+        $prescriptions = $query->latest()->paginate(7);
         return view('prescriptions.index', ['prescriptions' => $prescriptions]);
     }
 
@@ -30,20 +35,26 @@ class PrescriptionController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request);
         $validated = $request->validate([
             'image' => 'image|max:2048',
-            'status' => 'required|string|max:255',
             'medical_notes' => 'nullable|string',
-            'issued_date' => 'nullable|date',
         ]);
 
-        if ($request->hasFile('images')) {
-            $validated['images'] = array_map(function ($image) {
-                return $image->store('prescriptions', 'public');
-            }, $request->file('images'));
+        // if ($request->hasFile('images')) {
+        //     $validated['images'] = array_map(function ($image) {
+        //         return $image->store('prescriptions', 'public');
+        //     }, $request->file('images'));
+        // }
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('prescriptions', 'public');
         }
-        $profile =    Prescription::create(['profile_id' => Auth::id(), ...$validated]);
-        // dd($profile);
+
+        $validated['profile_id'] = Auth::user()->profile->id;
+        // dd($validated);
+        $prescription  = Prescription::create($validated);
+        // dd($prescription);
         return redirect()->route('prescriptions.index')->with('success', 'Prescription added successfully.');
     }
 
@@ -62,17 +73,12 @@ class PrescriptionController extends Controller
     {
         $validated = $request->validate([
             'image' => 'image|max:2048',
-            'status' => 'required|string|max:255',
             'medical_notes' => 'nullable|string',
-            'issued_date' => 'nullable|date',
         ]);
 
-        if ($request->hasFile('images')) {
-            $validated['images'] = array_map(function ($image) {
-                return $image->store('prescriptions', 'public');
-            }, $request->file('images'));
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('prescriptions', 'public');
         }
-
         $prescription->update($validated);
 
         return redirect()->route('prescriptions.index')->with('success', 'Prescription updated successfully.');

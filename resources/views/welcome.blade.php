@@ -8,7 +8,7 @@
                 Services</a>
         </div>
     </section>
-    <x-map />
+  
     <!-- Services Section -->
     <section id="services" class="py-16 bg-gray-100">
         <div class="container mx-auto text-center">

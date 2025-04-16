@@ -28,12 +28,12 @@
                     @enderror
                 </div>
 
-                <!-- Location -->
+                <!-- Address -->
                 <div>
-                    <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                    <textarea id="location" name="location" rows="2"
-                              class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('location') border-red-500 @enderror">{{ old('location') }}</textarea>
-                    @error('location')
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <textarea id="address" name="address" rows="2"
+                              class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('address') border-red-500 @enderror">{{ old('address') }}</textarea>
+                    @error('address')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
@@ -117,6 +117,13 @@
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+
+                <!-- Auto-Fill Button -->
+                <div class="md:col-span-2">
+                    <button type="button" id="autoFillBtn" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Auto-Fill Location
+                    </button>
+                </div>
             </div>
 
             <!-- Submit Button -->
@@ -128,4 +135,61 @@
             </div>
         </form>
     </div>
+
+    <!-- JavaScript for Geolocation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const latitudeField = document.getElementById('latitude');
+            const longitudeField = document.getElementById('longitude');
+            const countryField = document.getElementById('country');
+            const stateField = document.getElementById('state');
+            const cityField = document.getElementById('city');
+            const addressField = document.getElementById('address');
+            const autoFillBtn = document.getElementById('autoFillBtn');
+
+            function fillGeolocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function (position) {
+                            latitudeField.value = position.coords.latitude;
+                            longitudeField.value = position.coords.longitude;
+                            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    const address = data.address || {};
+                                    countryField.value = address.country || '';
+                                    stateField.value = address.state || address.region || '';
+                                    cityField.value = address.city || address.town || address.village || '';
+                                    addressField.value = data.display_name || '';
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching location details:', error);
+                                    alert('Unable to fetch location details. Please try again.');
+                                });
+                        },
+                        function (error) {
+                            console.error('Geolocation error:', error.message);
+                            alert('Unable to retrieve location. Please check permissions or try again.');
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                } else {
+                    console.warn('Geolocation is not supported by this browser.');
+                    alert('Geolocation is not supported by your browser.');
+                }
+            }
+
+            // Auto-fill on load if all fields are empty
+            if (!latitudeField.value && !longitudeField.value && !countryField.value && !stateField.value && !cityField.value && !addressField.value) {
+                fillGeolocation();
+            }
+
+            // Attach to button click
+            autoFillBtn.addEventListener('click', fillGeolocation);
+        });
+    </script>
 </x-dashboardLayout>

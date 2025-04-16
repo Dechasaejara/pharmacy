@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
@@ -13,6 +14,12 @@ class TransactionController extends Controller
     public function index()
     {
         $transactions = Transaction::latest()->paginate(7);
+        $profile = Auth::user()->profile;
+        $query = Transaction::query();
+        if ($profile->role === 'User') {
+            $query->where('profile_id', $profile->id);
+        }
+        $transactions = $query->latest()->paginate(7);
         return view('transactions.index', ['transactions' => $transactions]);
     }
 

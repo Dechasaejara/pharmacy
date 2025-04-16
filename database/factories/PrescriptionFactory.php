@@ -16,7 +16,6 @@ class PrescriptionFactory extends Factory
             'image' => fake()->imageUrl(),
             'status' => fake()->randomElement(['pending', 'approved', 'rejected']),
             'medical_notes' => fake()->paragraph(),
-            'issued_date' => fake()->date(),
         ];
     }
 }

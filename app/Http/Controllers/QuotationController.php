@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pharmacy;
+use App\Models\Prescription;
 use App\Models\Quotation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class QuotationController extends Controller
 {
@@ -12,8 +15,18 @@ class QuotationController extends Controller
      */
     public function index()
     {
-        $quotations = Quotation::latest()->paginate(7);
-        return view('quotations.index', ['quotations' => $quotations]);
+        // $pharmacies = Pharmacy::orderBy('name')->get();
+
+        $profile = Auth::user()->profile;
+        $query = Quotation::with('pharmacy');
+
+        if ($profile->role === 'User') {
+            $query->where('profile_id', $profile->id);
+        }
+
+        $quotations = $query->latest()->paginate(7);
+        // dd($quotations);
+        return view('quotations.index', compact('quotations'));
     }
 
     /**
@@ -21,7 +34,10 @@ class QuotationController extends Controller
      */
     public function create()
     {
-        return view('quotations.create');
+        $prescriptions = Prescription::with('profile')->get();
+        $pharmacies = Pharmacy::get();
+        // dd($pharmacies);
+        return view('quotations.create', compact('prescriptions', 'pharmacies'));
     }
 
     /**
@@ -38,7 +54,7 @@ class QuotationController extends Controller
             'valid_until' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
-
+        // dd($validated);
         Quotation::create($validated);
 
         return redirect()->route('quotations.index')->with('success', 'Quotation added successfully.');

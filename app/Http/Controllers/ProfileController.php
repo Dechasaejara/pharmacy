@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pharmacy;
 use App\Models\Profile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -32,6 +33,7 @@ class ProfileController extends Controller
     {
         $validated = $request->validate([
             'bio' => 'nullable|string|max:500',
+            'fullname' => 'required|string|max:500',
             'picture' => 'nullable|image|max:2048',
             'role' => 'required|in:User,Admin,Pharmacist',
             'phone' => 'nullable|regex:/^[0-9]{10,15}$/',
@@ -55,20 +57,15 @@ class ProfileController extends Controller
         return redirect()->route('profiles.index')->with('success', 'Profile created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Profile $profile)
-    {
-        return view('profiles.show', ['profile' => $profile]);
-    }
 
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(Profile $profile)
     {
-        return view('profiles.edit', ['profile' => $profile]);
+        $pharmacies = Pharmacy::with('pharmacists')->get();
+        // dd($profile);
+        return view('profiles.edit', compact('profile', 'pharmacies'));
     }
 
     /**
@@ -78,8 +75,9 @@ class ProfileController extends Controller
     {
         $validated = $request->validate([
             'bio' => 'nullable|string|max:500',
+            'fullname' => 'nullable|string|max:500',
             'picture' => 'nullable|image|max:2048',
-            'role' => 'required|in:User,Admin,Pharmacist',
+            'role' => 'nullable|in:User,Admin,Pharmacist',
             'phone' => 'nullable|regex:/^[0-9]{10,15}$/',
             'address' => 'nullable|string|max:255',
             'date_of_birth' => 'nullable|date',
@@ -91,7 +89,7 @@ class ProfileController extends Controller
             'city' => 'nullable|string|max:100',
             'social_links' => 'nullable|string|max:255',
         ]);
-
+        // dd($validated);
         if ($request->hasFile('picture')) {
             // Delete the old picture if it exists
             if ($profile->picture) {
@@ -99,9 +97,11 @@ class ProfileController extends Controller
             }
             $validated['picture'] = $request->file('picture')->store('profiles', 'public');
         }
-
-        $profile->update($validated);
-
+          $profile->update($validated);
+        // dd($validated);
+        if ($profile->role == "User") {
+            return redirect()->route('dashboard')->with('success', 'Profile updated successfully.');
+        }
         return redirect()->route('profiles.index')->with('success', 'Profile updated successfully.');
     }
 

@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Facades\Auth;
 
-use function PHPUnit\Framework\returnArgument;
-use function PHPUnit\Framework\returnSelf;
 
 class AuthController extends Controller
 {
@@ -24,6 +22,9 @@ class AuthController extends Controller
 
         // register
         $user = User::create($useFields);
+        Profile::create([
+            'user_id' => $user->id
+        ]);
         // login
         Auth::login($user);
 

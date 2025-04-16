@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('prescriptions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('profile_id')->default(1); // Foreign key to profiles
+            $table->unsignedBigInteger('profile_id'); // Foreign key to profiles
+            $table->string('unique_name')->unique(); // JSON array of prescription images
             $table->string('image')->nullable(); // JSON array of prescription images
-            $table->string('status')->default('pending'); // Status of the prescription (e.g., pending, approved, rejected)
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->text('medical_notes')->nullable(); // Additional medical notes or instructions
-            $table->date('issued_date')->nullable(); // Date the prescription was issued
             $table->timestamps();
 
             // Foreign key constraints

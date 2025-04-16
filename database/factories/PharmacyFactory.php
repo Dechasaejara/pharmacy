@@ -12,10 +12,9 @@ class PharmacyFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => \App\Models\User::factory(),
             'name' => fake()->company(),
             'license_number' => fake()->unique()->numerify('LIC-#####'),
-            'location' => fake()->address(),
+            'address' => fake()->address(),
             'picture' => fake()->imageUrl(),
             'phone' => fake()->phoneNumber(),
             'email' => fake()->unique()->safeEmail(),

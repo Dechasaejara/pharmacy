@@ -16,7 +16,7 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-4 py-2 border border-gray-300 text-left">ID</th>
-                        <th class="px-4 py-2 border border-gray-300 text-left">Name</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Full Name</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Role</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Phone</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Address</th>
@@ -27,7 +27,7 @@
                     @foreach ($profiles as $profile)
                         <tr class="hover:bg-gray-50">
                             <td class="px-4 py-2 border border-gray-300">{{ $profile->id }}</td>
-                            <td class="px-4 py-2 border border-gray-300">{{ $profile->user_id }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $profile->fullname }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $profile->role }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $profile->phone }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $profile->address }}</td>
