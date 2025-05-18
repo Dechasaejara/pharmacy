@@ -75,7 +75,12 @@ function addQuotationMarkers(map, quotations) {
             marker.bindPopup(`
                 <div class="p-2">
                     <h3 class="font-bold text-lg">${quotation.pharmacy_name}</h3>
-                    
+                    <div class="mt-2">
+                        <p class="text-sm"><strong>Quotation Status:</strong> <span class="uppercase">${quotation.status}</span></p>
+                        <p class="text-sm"><strong>Total Amount:</strong> $${quotation.total_amount}</p>
+                        <p class="text-sm"><strong>Valid Until:</strong> ${quotation.valid_until || 'N/A'}</p>
+                        <p class="text-sm"><strong>Notes:</strong> ${quotation.notes || 'None'}</p>
+                    </div>
                 </div>
             `);
         }
