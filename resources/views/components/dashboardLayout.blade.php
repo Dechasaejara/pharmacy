@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{ env('APP_NAME', 'Pharmacy Dashboard') }}</title>
+    <title>{{ env('APP_NAME', ' Dashboard') }}</title>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -18,7 +18,7 @@
             <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            <h1 class="text-2xl font-semibold text-emerald-400">Pharma</h1>
+            <h1 class="text-2xl font-semibold text-emerald-400">{{ env('APP_NAME') }}</h1>
         </div>
         <nav class="mt-6 px-3 flex-1 overflow-y-auto">
             <ul class="space-y-2">
@@ -285,13 +285,13 @@
     </header>
 
     <!-- Content -->
-    <main class="flex-grow p-6 bg-gray-50 overflow-y-auto">
+    <main class="flex-grow p-6 bg-gray-50 ">
         {{ $slot }}
     </main>
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-gray-300 text-center py-4">
-        <p>© {{ date('Y') }} Pharmacy Management System. All rights reserved.</p>
+        <p class="text-sm">© {{ date('Y') }} {{ env('APP_NAME', 'Pharmacy') }}. All rights reserved.</p>
     </footer>
 </div>
 <!-- Scripts Section -->

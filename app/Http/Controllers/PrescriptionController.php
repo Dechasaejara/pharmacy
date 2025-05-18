@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Prescription;
+use App\Models\PrescriptionVw;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,16 +12,23 @@ class PrescriptionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $profile = Auth::user()->profile;
-        $query = Prescription::query();
-        if ($profile->role === 'User') {
-            $query->where('profile_id', $profile->id);
-        }
-        $prescriptions = $query->latest()->paginate(7);
-        return view('prescriptions.index', ['prescriptions' => $prescriptions]);
+   public function index()
+{
+    $profile = Auth::user()->profile;
+
+    // Query the view
+    $query = PrescriptionVw::query();
+
+    // Apply conditions based on the user's role
+    if ($profile->role === 'User') {
+        $query->where('profile_id', $profile->id);
     }
+
+    // Paginate the results
+    $prescriptions = $query->latest('created_at')->paginate(7);
+
+    return view('prescriptions.index', ['prescriptions' => $prescriptions]);
+}
 
     /**
      * Show the form for creating a new resource.

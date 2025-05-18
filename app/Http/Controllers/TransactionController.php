@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use App\Models\Quotation;
+use App\Models\TransactionVw;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller
 {
@@ -13,13 +16,17 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        $transactions = Transaction::latest()->paginate(7);
         $profile = Auth::user()->profile;
-        $query = Transaction::query();
+
+        // Query transactions based on user role
+        $query = TransactionVw::query();
+        // dd($query);
         if ($profile->role === 'User') {
             $query->where('profile_id', $profile->id);
         }
+
         $transactions = $query->latest()->paginate(7);
+
         return view('transactions.index', ['transactions' => $transactions]);
     }
 
@@ -28,7 +35,10 @@ class TransactionController extends Controller
      */
     public function create()
     {
-        return view('transactions.create');
+        // $quotations = Quotation::with('profile')->get();
+        $quotations = Quotation::get();
+        // dd($pharmacies);
+        return view('transactions.create', compact('quotations'));
     }
 
     /**
@@ -38,16 +48,32 @@ class TransactionController extends Controller
     {
         $validated = $request->validate([
             'quotation_id' => 'required|exists:quotations,id',
-            'profile_id' => 'required|exists:profiles,id',
-            'pharmacy_id' => 'required|exists:pharmacies,id',
             'total_amount' => 'required|numeric|min:0',
             'status' => 'required|string|max:255',
             'completed_at' => 'nullable|date',
+        ], [
+            'quotation_id.required' => 'The quotation ID is required.',
+            'quotation_id.exists' => 'The selected quotation does not exist.',
+            'total_amount.required' => 'The total amount is required.',
+            'total_amount.numeric' => 'The total amount must be a valid number.',
+            'status.required' => 'The status is required.',
         ]);
 
-        Transaction::create($validated);
+        try {
+            // Ensure the quotation belongs to the authenticated user's profile
+            $quotation = Quotation::findOrFail($validated['quotation_id']);
+            if (Auth::user()->profile->id !== $quotation->profile_id) {
+                return redirect()->back()->withErrors(['quotation_id' => 'You are not authorized to use this quotation.']);
+            }
 
-        return redirect()->route('transactions.index')->with('success', 'Transaction added successfully.');
+            $transaction = Transaction::create($validated);
+            // dd($transaction);
+            return redirect()->route('transactions.index')->with('success', 'Transaction added successfully.');
+        } catch (\Exception $e) {
+            Log::error('Transaction creation failed: ' . $e->getMessage());
+            // dd($e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'An error occurred while creating the transaction.']);
+        }
     }
 
     /**
@@ -55,6 +81,10 @@ class TransactionController extends Controller
      */
     public function edit(Transaction $transaction)
     {
+        if (!$transaction) {
+            abort(404, 'Transaction not found.');
+        }
+
         return view('transactions.edit', ['transaction' => $transaction]);
     }
 
@@ -65,16 +95,25 @@ class TransactionController extends Controller
     {
         $validated = $request->validate([
             'quotation_id' => 'required|exists:quotations,id',
-            'profile_id' => 'required|exists:profiles,id',
-            'pharmacy_id' => 'required|exists:pharmacies,id',
             'total_amount' => 'required|numeric|min:0',
             'status' => 'required|string|max:255',
             'completed_at' => 'nullable|date',
+        ], [
+            'quotation_id.required' => 'The quotation ID is required.',
+            'quotation_id.exists' => 'The selected quotation does not exist.',
+            'total_amount.required' => 'The total amount is required.',
+            'total_amount.numeric' => 'The total amount must be a valid number.',
+            'status.required' => 'The status is required.',
         ]);
 
-        $transaction->update($validated);
+        try {
+            $transaction->update($validated);
 
-        return redirect()->route('transactions.index')->with('success', 'Transaction updated successfully.');
+            return redirect()->route('transactions.index')->with('success', 'Transaction updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Transaction update failed: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'An error occurred while updating the transaction.']);
+        }
     }
 
     /**
@@ -82,8 +121,13 @@ class TransactionController extends Controller
      */
     public function destroy(Transaction $transaction)
     {
-        $transaction->delete();
+        try {
+            $transaction->delete();
 
-        return redirect()->route('transactions.index')->with('success', 'Transaction deleted successfully.');
+            return redirect()->route('transactions.index')->with('success', 'Transaction deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error('Transaction deletion failed: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'An error occurred while deleting the transaction.']);
+        }
     }
 }

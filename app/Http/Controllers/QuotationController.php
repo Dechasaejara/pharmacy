@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pharmacy;
 use App\Models\Prescription;
 use App\Models\Quotation;
+use App\Models\QuotationVw;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,13 +19,14 @@ class QuotationController extends Controller
         // $pharmacies = Pharmacy::orderBy('name')->get();
 
         $profile = Auth::user()->profile;
-        $query = Quotation::with('pharmacy');
+        // $query = Quotation::with('pharmacy');
 
+        $query = QuotationVw::query();
         if ($profile->role === 'User') {
             $query->where('profile_id', $profile->id);
         }
-
-        $quotations = $query->latest()->paginate(7);
+        // dd($query);
+        $quotations = $query->latest('created_at')->paginate(7);
         // dd($quotations);
         return view('quotations.index', compact('quotations'));
     }
@@ -47,15 +49,18 @@ class QuotationController extends Controller
     {
         $validated = $request->validate([
             'prescription_id' => 'required|exists:prescriptions,id',
-            'profile_id' => 'required|exists:profiles,id',
-            'pharmacy_id' => 'required|exists:pharmacies,id',
+            // 'profile_id' => 'required|exists:profiles,id',
+            // 'pharmacy_id' => 'required|exists:pharmacies,id',
             'total_amount' => 'required|numeric|min:0',
             'status' => 'required|string|max:255',
-            'valid_until' => 'nullable|date',
+            // 'valid_until' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
+        $profile = Auth::user()->profile;
         // dd($validated);
-        Quotation::create($validated);
+        // Quotation::create($validated);
+
+        Quotation::create(['profile_id' => $profile->id, ...$validated]);
 
         return redirect()->route('quotations.index')->with('success', 'Quotation added successfully.');
     }
@@ -75,11 +80,11 @@ class QuotationController extends Controller
     {
         $validated = $request->validate([
             'prescription_id' => 'required|exists:prescriptions,id',
-            'profile_id' => 'required|exists:profiles,id',
-            'pharmacy_id' => 'required|exists:pharmacies,id',
+            // 'profile_id' => 'required|exists:profiles,id',
+            // 'pharmacy_id' => 'required|exists:pharmacies,id',
             'total_amount' => 'required|numeric|min:0',
             'status' => 'required|string|max:255',
-            'valid_until' => 'nullable|date',
+            // 'valid_until' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
 

@@ -13,8 +13,8 @@ class Transaction extends Model
     use HasFactory;
     protected $fillable = [
         'quotation_id',
-        'profile_id',
-        'pharmacy_id',
+        // 'profile_id',
+        // 'pharmacy_id',
         'total_amount',
         'status',
         'completed_at',

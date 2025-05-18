@@ -19,12 +19,13 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-4 py-2 border border-gray-300 text-left">ID</th>
-                        <th class="px-4 py-2 border border-gray-300 text-left">Prescription ID</th>
-                        <th class="px-4 py-2 border border-gray-300 text-left">Profile ID</th>
-                        <th class="px-4 py-2 border border-gray-300 text-left">Pharmacy ID</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Name</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Prescription</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Profile</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Pharmacy</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Total Amount</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Status</th>
-                        <th class="px-4 py-2 border border-gray-300 text-left">Valid Until</th>
+                        {{-- <th class="px-4 py-2 border border-gray-300 text-left">Valid Until</th> --}}
                         <th class="px-4 py-2 border border-gray-300 text-left">Notes</th>
                         <th class="px-4 py-2 border border-gray-300 text-center">Actions</th>
                     </tr>
@@ -32,19 +33,22 @@
                 <tbody>
                     @foreach ($quotations as $quotation)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2 border border-gray-300">{{ $quotation->id }}</td>
-                            <td class="px-4 py-2 border border-gray-300">{{ $quotation->prescription_id }}</td>
-                            <td class="px-4 py-2 border border-gray-300">{{ $quotation->profile_id }}</td>
-                            <td class="px-4 py-2 border border-gray-300">{{ $quotation->pharmacy_id }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $quotation->quotation_id }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $quotation->name }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $quotation->prescription_unique_name }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $quotation->profile_name }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $quotation->pharmacy_name }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $quotation->total_amount }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $quotation->status }}</td>
-                            <td class="px-4 py-2 border border-gray-300">{{ $quotation->valid_until }}</td>
-                            <td class="px-4 py-2 border border-gray-300">{{ strlen($quotation->notes) > 20 ? substr($quotation->notes, 0, 20) . '...' : $quotation->notes }}</td>
+                            {{-- <td class="px-4 py-2 border border-gray-300">{{ $quotation->valid_until }}</td> --}}
+                            <td class="px-4 py-2 border border-gray-300">
+                                {{ strlen($quotation->notes) > 20 ? substr($quotation->notes, 0, 20) . '...' : $quotation->notes }}
+                            </td>
                             <td class="px-4 py-2 border border-gray-300 text-center">
                                 @if (auth()->user()->profile->role === 'Pharmacist')
-                                    <a href="{{ route('quotations.edit', $quotation->id) }}"
+                                    <a href="{{ route('quotations.edit', $quotation->quotation_id) }}"
                                         class="text-blue-500 hover:underline">Edit</a>
-                                    <form action="{{ route('quotations.destroy', $quotation->id) }}" method="POST"
+                                    <form action="{{ route('quotations.destroy', $quotation->quotation_id) }}" method="POST"
                                         class="inline-block">
                                         @csrf
                                         @method('DELETE')
@@ -54,7 +58,6 @@
                                         </button>
                                     </form>
                                 @endif
-
                             </td>
                         </tr>
                     @endforeach

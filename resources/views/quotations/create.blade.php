@@ -25,7 +25,7 @@
                 @enderror
             </div>
 
-            <div>
+            {{-- <div>
                 <label for="pharmacy_id" class="block text-sm font-medium text-gray-700 mb-1">Pharmacy</label>
                 <select id="pharmacy_id" name="pharmacy_id"
                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('pharmacy_id') border-red-500 @enderror">
@@ -39,9 +39,9 @@
                 @error('pharmacy_id')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
-            </div>
+            </div> --}}
             <!-- Profile ID -->
-            <div>
+            {{-- <div>
                 <label for="profile_id" class="block text-sm font-medium text-gray-700 mb-1">Pharmacist</label>
                 <input type="text" id="profile_id" name="profile_id"
                     value="{{ old('profile_id', auth()->user()->profile->id) }}"
@@ -50,7 +50,7 @@
                 @error('profile_id')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
-            </div>
+            </div> --}}
 
 
             <!-- Total Amount -->
@@ -83,14 +83,14 @@
             </div>
 
             <!-- Valid Until -->
-            <div>
+            {{-- <div>
                 <label for="valid_until" class="block text-sm font-medium text-gray-700 mb-1">Valid Until</label>
                 <input type="date" id="valid_until" name="valid_until" value="{{ old('valid_until') }}"
                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('valid_until') border-red-500 @enderror">
                 @error('valid_until')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
-            </div>
+            </div> --}}
 
             <!-- Notes -->
             <div>

@@ -7,16 +7,23 @@
             @csrf
 
             <!-- Quotation ID -->
+           
             <div>
-                <label for="quotation_id" class="block text-sm font-medium text-gray-700 mb-1">Quotation ID</label>
-                <input type="text" id="quotation_id" name="quotation_id" value="{{ old('quotation_id') }}"
-                       class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('quotation_id') border-red-500 @enderror" required>
+                <label for="quotation_id" class="block text-sm font-medium text-gray-700 mb-1">Quotation</label>
+                <select id="quotation_id" name="quotation_id"
+                        class="w-full border  rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('quotation_id') border-red-500 @enderror">
+                    <option value="">Select a Quotation</option>
+                    @foreach ($quotations as $quotation)
+                        <option value="{{ $quotation->id }}" {{ old('quotation_id') == $quotation->id ? 'selected' : '' }}>
+                           {{ $quotation->unique_name }}
+                        </option>
+                    @endforeach
+                </select>
                 @error('quotation_id')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
-
-            <!-- Profile ID -->
+            {{-- <!-- Profile ID -->
             <div>
                 <label for="profile_id" class="block text-sm font-medium text-gray-700 mb-1">Profile ID</label>
                 <input type="text" id="profile_id" name="profile_id" value="{{ old('profile_id') }}"
@@ -24,17 +31,17 @@
                 @error('profile_id')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
-            </div>
+            </div> --}}
 
             <!-- Pharmacy ID -->
-            <div>
+            {{-- <div>
                 <label for="pharmacy_id" class="block text-sm font-medium text-gray-700 mb-1">Pharmacy ID</label>
                 <input type="text" id="pharmacy_id" name="pharmacy_id" value="{{ old('pharmacy_id') }}"
                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('pharmacy_id') border-red-500 @enderror" required>
                 @error('pharmacy_id')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
-            </div>
+            </div> --}}
 
             <!-- Total Amount -->
             <div>
@@ -49,8 +56,15 @@
             <!-- Status -->
             <div>
                 <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <input type="text" id="status" name="status" value="{{ old('status') }}"
-                       class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('status') border-red-500 @enderror" required>
+                <select id="status" name="status"
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('status') border-red-500 @enderror"
+                    required>
+                    <option value="approved" disabled {{ old('status') ? '' : 'selected' }}>Select status</option>
+                    @foreach ([ 'approved', 'rejected', 'accepted'] as $roleOption)
+                        <option value="{{ $roleOption }}" {{ old('status') === $roleOption ? 'selected' : '' }}>
+                            {{ $roleOption }}</option>
+                    @endforeach
+                </select>
                 @error('status')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class Prescription extends Model
 {
@@ -24,8 +25,10 @@ class Prescription extends Model
 
         // Generate unique_name before creating the record
         static::creating(function ($prescription) {
+            $profile = Auth::user()->profile;
+            $fullname = str_replace(' ', '_', $profile->fullname); // Replace spaces with underscores
             $timestamp = now()->format('YmdHis'); // e.g., "20231025143045"
-            $prescription->unique_name = "pre_{$prescription->profile_id}_{$timestamp}";
+            $prescription->unique_name = "p_{$fullname}_{$timestamp}";
         });
     }
     public function profile(): BelongsTo

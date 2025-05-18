@@ -18,24 +18,24 @@
             </div>
 
             <!-- Profile ID -->
-            <div>
+            {{-- <div>
                 <label for="profile_id" class="block text-sm font-medium text-gray-700 mb-1">Profile ID</label>
                 <input type="text" id="profile_id" name="profile_id" value="{{ old('profile_id', $transaction->profile_id) }}"
                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('profile_id') border-red-500 @enderror" required>
                 @error('profile_id')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
-            </div>
+            </div> --}}
 
             <!-- Pharmacy ID -->
-            <div>
+            {{-- <div>
                 <label for="pharmacy_id" class="block text-sm font-medium text-gray-700 mb-1">Pharmacy ID</label>
                 <input type="text" id="pharmacy_id" name="pharmacy_id" value="{{ old('pharmacy_id', $transaction->pharmacy_id) }}"
                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('pharmacy_id') border-red-500 @enderror" required>
                 @error('pharmacy_id')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
-            </div>
+            </div> --}}
 
             <!-- Total Amount -->
             <div>

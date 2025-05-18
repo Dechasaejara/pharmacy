@@ -47,7 +47,7 @@ class InventoryController extends Controller
     {
         try {
             $validated = $request->validate([
-                'pharmacy_id' => 'required|exists:pharmacies,id',
+                // 'pharmacy_id' => 'required|exists:pharmacies,id',
                 'product_id' => 'required|exists:products,id',
                 'batch_number' => 'nullable|string|max:255',
                 'manufacturer' => 'nullable|string|max:255',
@@ -58,7 +58,8 @@ class InventoryController extends Controller
                 'storage_location' => 'nullable|string|max:255',
                 'is_active' => 'required|boolean',
             ]);
-
+            $profile = Auth::user()->profile;
+            // dd($profile);
             Inventory::create($validated);
 
             return redirect()->route('inventories.index')->with('success', 'Inventory added successfully.');
@@ -88,7 +89,7 @@ class InventoryController extends Controller
     public function update(Request $request, Inventory $inventory)
     {
         $validated = $request->validate([
-            'pharmacy_id' => 'required|exists:pharmacies,id',
+            // 'pharmacy_id' => 'required|exists:pharmacies,id',
             'product_id' => 'required|exists:products,id',
             'batch_number' => 'nullable|string|max:255',
             'manufacturer' => 'nullable|string|max:255',

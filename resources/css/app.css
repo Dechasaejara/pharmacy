@@ -96,7 +96,7 @@
 
     /* Links */
     a {
-        color: var(--cl-gray-500);
+        color: var(--cl-gray-100);
         text-decoration: none;
         transition: color 0.2s ease;
     }

@@ -18,7 +18,7 @@
                     <tr>
                         <th class="px-4 py-2 border border-gray-300 text-left">ID</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Name</th>
-                        <th class="px-4 py-2 border border-gray-300 text-left">Patient ID</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Patient</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Status</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Medical Notes</th>
                         <th class="px-4 py-2 border border-gray-300 text-left">Issued Date</th>
@@ -31,7 +31,7 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-4 py-2 border border-gray-300">{{ $prescription->id }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $prescription->unique_name }}</td>
-                            <td class="px-4 py-2 border border-gray-300">{{ $prescription->profile_id }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $prescription->profile_name }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $prescription->status }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $prescription->medical_notes }}</td>
                             <td class="px-4 py-2 border border-gray-300">{{ $prescription->created_at }}</td>

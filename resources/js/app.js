@@ -167,8 +167,9 @@ function initializeQuotationMap(mapElement) {
 function parseQuotationData(mapElement) {
     try {
         const data = mapElement.getAttribute("data-quotations");
-        console.log('Raw JSON data:', data); 
+       
         const parsed = JSON.parse(data) || [];
+        console.log({parsed}); 
         // Ensure we always return an array
         return Array.isArray(parsed) ? parsed : [];
     } catch (error) {

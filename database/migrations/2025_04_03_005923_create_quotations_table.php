@@ -20,6 +20,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'approved', 'rejected', 'accepted'])->default('pending');
             $table->date('valid_until')->nullable(); // Expiry date of the quotation
             $table->text('notes')->nullable();
+            $table->string('unique_name')->unique();
             $table->timestamps();
 
             $table->foreign('prescription_id')->references('id')->on('prescriptions')->onDelete('cascade');
