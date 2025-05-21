@@ -9,90 +9,114 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\TransactionController;
-use App\Models\Inventory;
-use App\Models\Pharmacy;
+use App\Models\Inventory; // Assuming these are used elsewhere or for dashboard
+use App\Models\Pharmacy as PharmacyModel; // Alias if Pharmacy controller is also Pharmacy
 use App\Models\Prescription;
 use App\Models\Product;
-use App\Models\Profile;
+use App\Models\Profile as ProfileModel; // Alias
 use App\Models\Quotation;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+// ... (your existing welcome and dashboard routes) ...
 Route::get('/', function () {
-    // Fetch top pharmacies (e.g., based on ratings or some criteria)
-    $topPharmacies = Pharmacy::orderBy('name', 'desc')->get();
-    // Fetch trending products (e.g., based on sales or popularity)
-    $trendingProducts = Product::orderBy('brand_name', 'desc')->get();
-
+    $topPharmacies = PharmacyModel::orderBy('name', 'desc')->take(5)->get();
+    $trendingProducts = Product::orderBy('brand_name', 'desc')->take(10)->get();
     return view('welcome', compact('topPharmacies', 'trendingProducts'));
 })->name('home');
 
-// Dashboard Route Based on Role
 Route::get('/dashboard', function () {
-    $user = Auth::user()->profile; // Get the authenticated user
-
-    // dd($user->profile);
-    // Check if the user has a profile
+    $user = Auth::user();
     if (!$user) {
-        abort(403, 'Unauthorized: Please consult your the administrator.');
+        // Should be caught by 'auth' middleware, but as a failsafe
+        return redirect()->route('login')->with('error', 'Authentication required.');
     }
 
-    $Prescriptionquery = Prescription::query();
+    $userProfile = $user->profile;
+
+    if (!$userProfile) {
+        Auth::logout();
+        return redirect()->route('login')->with('error', 'Your profile is not set up. Please contact support.');
+    }
+
+    $assignedPharmacy = null; // To store the fetched pharmacy model for relevant roles
+
+    // Pre-checks for roles requiring a valid pharmacy_id
+    if ($userProfile->role === 'Pharmacist' || $userProfile->role === 'Manager') {
+        if (!$userProfile->pharmacy_id) {
+            Auth::logout();
+            return redirect()->route('login')->with('error', 'Your profile is not assigned to a pharmacy. Please contact support.');
+        }
+        $assignedPharmacy = PharmacyModel::find($userProfile->pharmacy_id);
+        if (!$assignedPharmacy) {
+            // Data integrity issue: profile references a non-existent pharmacy
+            Auth::logout();
+            return redirect()->route('login')->with('error', 'Your assigned pharmacy could not be found. Please contact support.');
+        }
+    }
+
+    // Initialize Query Builders
+    $prescriptionQuery = Prescription::query();
     $quotationQuery = Quotation::query();
     $transQuery = Transaction::query();
-    $inventoryquery = Inventory::query();
-    $pharmacyQuery = Pharmacy::query();
+    $inventoryQuery = Inventory::query();
+    $pharmacyQuery = PharmacyModel::query();
     $productQuery = Product::query();
-    $profileQuery = Profile::query();
+    $profileQuery = ProfileModel::query();
     $userQuery = User::query();
 
-    if ($user->role === 'User') {
-        $Prescriptionquery->where('profile_id', $user->id);
-        $quotationQuery->where('profile_id', $user->id);
-        $transQuery->where('profile_id', $user->id);
+    // Apply role-based filters
+    if ($userProfile->role === 'User') {
+        $prescriptionQuery->where('profile_id', $userProfile->id);
+        $quotationQuery->where('profile_id', $userProfile->id);
+        $transQuery->where('profile_id', $userProfile->id);
     }
-    if ($user->role === 'Pharmacist') {
-        $inventoryquery->where('pharmacy_id', $user->pharmacy_id);
-        $pharmacyQuery->where('id', $user->pharmacy_id);
-        $productQuery->where('pharmacy_id', $user->pharmacy_id);
-    }
-    if ($user->role === 'Admin') {
-        $profileQuery->where('role', 'Manager');
-    }
-    if ($user->role === 'Manager') {
-        $pharmacyQuery->where('id', $user->pharmacy_id);
-        $productQuery->where('pharmacy_id', $user->pharmacy_id);
-    }
-    $totalPrescriptions = $Prescriptionquery->count(); // $user->prescriptions()->count();
-    $totalQuotations = $quotationQuery->count(); // $user->quotations()->count();
-    $totalTransactions = $transQuery->count(); //$user->transactions()->count();
-    $totalInventories = $inventoryquery->count(); // $user->inventories()->count();
-    $totalPharmacies = $pharmacyQuery->count(); // $user->pharmacies()->count();
-    $totalProducts = $productQuery->count(); // $user->products()->count();
-    $totalProfiles = $profileQuery->count(); // $user->profiles()->count();
-    $totalUsers = $userQuery->count(); // $user->users()->count();
 
-    // Redirect based on role
-    switch ($user->role) {
+    if ($userProfile->role === 'Pharmacist') {
+        // $userProfile->pharmacy_id and $assignedPharmacy are guaranteed to be valid here
+        $inventoryQuery->where('pharmacy_id', $userProfile->pharmacy_id);
+        $pharmacyQuery->where('id', $userProfile->pharmacy_id); // For $totalPharmacies, it will be 1
+        $productQuery->whereHas('inventories', fn($q) => $q->where('pharmacy_id', $userProfile->pharmacy_id));
+    }
+
+    if ($userProfile->role === 'Manager') {
+        // $userProfile->pharmacy_id and $assignedPharmacy are guaranteed to be valid here
+        $pharmacyQuery->where('id', $userProfile->pharmacy_id); // For $totalPharmacies, it will be 1
+        $productQuery->whereHas('inventories', fn($q) => $q->where('pharmacy_id', $userProfile->pharmacy_id));
+        $profileQuery->where('pharmacy_id', $userProfile->pharmacy_id);
+    }
+    // Note: Admins see all data, so no additional filters on queries like $pharmacyQuery, $productQuery etc. by default.
+
+    // Calculate totals
+    $totalPrescriptions = $prescriptionQuery->count();
+    $totalQuotations = $quotationQuery->count();
+    $totalTransactions = $transQuery->count();
+    $totalInventories = $inventoryQuery->count();
+    $totalPharmacies = $pharmacyQuery->count(); // For Admin, all pharmacies. For Pharmacist/Manager, 1 (their own).
+    $totalProducts = $productQuery->count();
+    $totalProfiles = $profileQuery->count();
+    $totalUsers = $userQuery->count();
+
+    switch ($userProfile->role) {
         case 'Admin':
-            return view('dashboard.adminDashboard', compact('totalPharmacies', 'totalProducts', 'totalProfiles'));
+            return view('dashboard.adminDashboard', compact('totalPharmacies', 'totalProducts', 'totalProfiles', 'totalUsers'));
         case 'Pharmacist':
-            return view('dashboard.pharmacistDashboard');
+             // Pass the already fetched $assignedPharmacy model to the view
+             return view('dashboard.pharmacistDashboard', compact('totalInventories', 'totalProducts', 'assignedPharmacy'));
         case 'Manager':
-            return view('dashboard.managerDashboard'); // Add a manager dashboard if needed
+            // Pass the already fetched $assignedPharmacy model to the view
+            return view('dashboard.managerDashboard', compact('totalProfiles', 'totalProducts', 'assignedPharmacy'));
         case 'User':
-        case 'Patient': // Assuming 'User' and 'Patient' are interchangeable
             return view('dashboard.patientDashboard', compact('totalPrescriptions', 'totalQuotations', 'totalTransactions'));
         default:
-            abort(403, 'Unauthorized'); // Handle unknown roles
+             Auth::logout();
+             return redirect()->route('login')->with('error', 'Invalid role. Access denied.');
     }
 })->middleware(['auth'])->name('dashboard');
 
-// Authenticated Routes
 Route::middleware('auth')->group(function () {
-    // Resources
     Route::resources([
         'profiles' => ProfileController::class,
         'products' => ProductController::class,
@@ -103,17 +127,25 @@ Route::middleware('auth')->group(function () {
         'quotations' => QuotationController::class,
         'lineitems' => LineItemController::class,
     ]);
-    Route::get('/profiles/assign/{pharmacy_id}', [ProfileController::class, 'assign'])->name('profiles.assign');
-    // Auth
+
+    // New routes for assigning roles
+    Route::get('/pharmacies/{pharmacy}/assign-manager', [ProfileController::class, 'showAssignManagerForm'])->name('profiles.showAssignManagerForm');
+    Route::get('/profiles/assign-pharmacist', [ProfileController::class, 'showAssignPharmacistForm'])->name('profiles.showAssignPharmacistForm');
+    // An admin might also want to assign a pharmacist to a specific pharmacy they select
+    Route::get('/admin/pharmacies/{pharmacy}/assign-pharmacist', [ProfileController::class, 'showAssignPharmacistForm'])->name('admin.profiles.showAssignPharmacistForm');
+
+
+    Route::post('/profiles/process-assignment', [ProfileController::class, 'processRoleAssignment'])->name('profiles.processRoleAssignment');
+
+    // Remove old assign route if it was: Route::get('/profiles/assign/{pharmacy_id}', [ProfileController::class, 'assign'])->name('profiles.assign');
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-// Guest Routes
+// Guest Routes (Unchanged from your provided snippet)
 Route::middleware('guest')->group(function () {
-    // Register
     Route::view('/auth/register', 'auth.register')->name('register');
     Route::post('auth/register', [AuthController::class, 'register']);
-    // Login
     Route::view('/auth/login', 'auth.login')->name('login');
     Route::post('auth/login', [AuthController::class, 'login']);
 });

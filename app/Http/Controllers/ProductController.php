@@ -16,11 +16,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        // $auth_user = Auth::getUser()->id;
-        // $user = User::Where('id', $auth_user)->get();
-        // // dd($user);
-        // $profile = Profile::Where('user_id', $auth_user)->get(); //where('user_id',$user)->get();
-        // dd($profile);
+
         $products = Product::latest()->paginate(7);
         return view('products.index', ['products' => $products]);
     }
@@ -54,13 +50,7 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product added successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Product $product)
-    {
-        return view('products.show', ['product' => $product]);
-    }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -83,7 +73,6 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('picture')) {
-            // Delete the old picture if it exists
             if ($product->picture) {
                 Storage::disk('public')->delete($product->picture);
             }
@@ -100,7 +89,6 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        // Delete the picture if it exists
         if ($product->picture) {
             Storage::disk('public')->delete($product->picture);
         }

@@ -18,14 +18,12 @@ class InventoryController extends Controller
      */
     public function index()
     {
-        // $inventories = Inventory::latest()->paginate(7);
         $profile = Auth::user()->profile;
         $query = Inventory::query();
         if ($profile->role === 'pharmacist') {
             $query->where('pharmacy_id', $profile->pharmacy->id);
         }
         $inventories = $query->with('pharmacy', 'product')->latest()->paginate(7);
-        // dd($inventories);
         return view('inventories.index', ['inventories' => $inventories]);
     }
 
@@ -34,8 +32,8 @@ class InventoryController extends Controller
      */
     public function create()
     {
-        $pharmacies = Pharmacy::all(); // Fetch all pharmacies
-        $products = Product::all(); // Fetch all products
+        $pharmacies = Pharmacy::all(); 
+        $products = Product::all(); 
 
         return view('inventories.create', compact('pharmacies', 'products'));
     }
@@ -59,12 +57,10 @@ class InventoryController extends Controller
                 'is_active' => 'required|boolean',
             ]);
             $profile = Auth::user()->profile;
-            // dd($profile);
             Inventory::create($validated);
 
             return redirect()->route('inventories.index')->with('success', 'Inventory added successfully.');
         } catch (ValidationException $e) {
-            // Validation errors are automatically handled by Laravel
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (Exception $e) {
             Log::error('Error creating inventory: ' . $e->getMessage());

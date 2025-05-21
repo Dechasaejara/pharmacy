@@ -16,15 +16,12 @@ class PrescriptionController extends Controller
 {
     $profile = Auth::user()->profile;
 
-    // Query the view
     $query = PrescriptionVw::query();
 
-    // Apply conditions based on the user's role
     if ($profile->role === 'User') {
         $query->where('profile_id', $profile->id);
     }
 
-    // Paginate the results
     $prescriptions = $query->latest('created_at')->paginate(7);
 
     return view('prescriptions.index', ['prescriptions' => $prescriptions]);
@@ -43,26 +40,18 @@ class PrescriptionController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request);
         $validated = $request->validate([
             'image' => 'image|max:2048',
             'medical_notes' => 'nullable|string',
         ]);
 
-        // if ($request->hasFile('images')) {
-        //     $validated['images'] = array_map(function ($image) {
-        //         return $image->store('prescriptions', 'public');
-        //     }, $request->file('images'));
-        // }
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('prescriptions', 'public');
         }
 
         $validated['profile_id'] = Auth::user()->profile->id;
-        // dd($validated);
         $prescription  = Prescription::create($validated);
-        // dd($prescription);
         return redirect()->route('prescriptions.index')->with('success', 'Prescription added successfully.');
     }
 

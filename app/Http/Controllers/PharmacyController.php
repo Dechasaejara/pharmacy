@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pharmacy;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -15,9 +14,7 @@ class PharmacyController extends Controller
      */
     public function index()
     {
-        $pharmacies = Pharmacy::latest()->paginate(7);
         $pharmacies = Pharmacy::with('pharmacists')->latest()->paginate(7);
-        // dd($pharmacies);
         return view('pharmacies.index', ['pharmacies' => $pharmacies]);
     }
 
@@ -38,7 +35,7 @@ class PharmacyController extends Controller
             'name' => 'required|string|max:255',
             'license_number' => 'required|string|max:255|unique:pharmacies,license_number',
             'address' => 'nullable|string|max:500',
-            'picture' => 'nullable|image|max:2048',
+            'picture' => 'nullable|image|max:2048', // Max 2MB
             'phone' => 'nullable|string|max:15',
             'email' => 'nullable|email|max:255|unique:pharmacies,email',
             'latitude' => 'nullable|numeric',
@@ -52,20 +49,20 @@ class PharmacyController extends Controller
             $validated['picture'] = $request->file('picture')->store('pharmacies', 'public');
         }
 
-        $pharmacy = Pharmacy::create(['profile_id' => Auth::user()->profile->id, ...$validated]);
-        // $pharmacies = Pharmacy::all();
-        // $users = User::all();
-        return redirect()->route('profiles.assign', ['pharmacy_id' => $pharmacy->id])
-            ->with('success', 'Pharmacy added successfully.');
+         $creatorProfileId = Auth::user()->profile->id ?? null;
+        if (!$creatorProfileId) {
+            // Handle cases where the user might not have a profile, though 'auth' middleware should ensure a user.
+            // This depends on your application's user setup.
+            // For now, we assume a profile exists for the authenticated user.
+        }
+
+
+        $pharmacy = Pharmacy::create(['profile_id' => $creatorProfileId, ...$validated]);
+
+        return redirect()->route('profiles.showAssignManagerForm', ['pharmacy' => $pharmacy->id])
+            ->with('success', 'Pharmacy created successfully. Please assign a Manager.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Pharmacy $pharmacy)
-    {
-        return view('pharmacies.show', ['pharmacy' => $pharmacy]);
-    }
 
     /**
      * Show the form for editing the specified resource.
@@ -95,7 +92,6 @@ class PharmacyController extends Controller
         ]);
 
         if ($request->hasFile('picture')) {
-            // Delete the old picture if it exists
             if ($pharmacy->picture) {
                 Storage::disk('public')->delete($pharmacy->picture);
             }
@@ -112,11 +108,9 @@ class PharmacyController extends Controller
      */
     public function destroy(Pharmacy $pharmacy)
     {
-        // Delete the picture if it exists
         if ($pharmacy->picture) {
             Storage::disk('public')->delete($pharmacy->picture);
         }
-
         $pharmacy->delete();
 
         return redirect()->route('pharmacies.index')->with('success', 'Pharmacy deleted successfully.');
