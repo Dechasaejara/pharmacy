@@ -38,18 +38,65 @@ function initializeMapIfExists() {
 }
 
 function initializeQuotationMap(mapElement) {
-    const defaultLat = 9.7128;
-    const defaultLng = 38.006;
-    const map = L.map(mapElement).setView([defaultLat, defaultLng], 13);
+    const defaultLat = 8.9806; // Latitude for Addis Ababa
+    const defaultLng = 38.7578; // Longitude for Addis Ababa
+    const defaultZoom = 12; // City level zoom
+
+    const map = L.map(mapElement);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
+    // Try to get current location
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                map.setView([lat, lng], defaultZoom); // Set view to current location
+            },
+            (error) => {
+                console.warn("Geolocation failed, using default location:", error);
+                map.setView([defaultLat, defaultLng], defaultZoom); // Fallback to default
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Location Unavailable',
+                    text: 'Could not retrieve your current location. Displaying map for Addis Ababa.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            }
+        );
+    } else {
+        console.log("Geolocation is not supported by this browser, using default location.");
+        map.setView([defaultLat, defaultLng], defaultZoom); // Fallback to default
+        Swal.fire({
+            icon: 'info',
+            title: 'Geolocation Not Supported',
+            text: 'Your browser does not support geolocation. Displaying map for Addis Ababa.',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000
+        });
+    }
+
     const quotations = parseQuotationData(mapElement);
     addQuotationMarkers(map, quotations);
-    fitMapToQuotationBounds(map, quotations);
+
+    // Only fit bounds if there are quotations, otherwise the initial view from geolocation/default is used
+    if (quotations.length > 0) {
+        fitMapToQuotationBounds(map, quotations);
+    }
 }
 
 function parseQuotationData(mapElement) {

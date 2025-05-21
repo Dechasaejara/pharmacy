@@ -19,7 +19,23 @@
                             class="w-full border border-gray-200 rounded-lg px-4 py-2 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors @error('role') border-red-500 @enderror"
                             required>
                             <option value="" disabled>Select Role</option>
-                            @foreach (['User', 'Admin', 'Pharmacist', 'Manager'] as $roleOption)
+                            @foreach (['User', 'Admin', 'Manager'] as $roleOption)
+                                <option value="{{ $roleOption }}" {{ old('role', $profile->role ?? '') === $roleOption ? 'selected' : '' }}>{{ $roleOption }}</option>
+                            @endforeach
+                        </select>
+                        @error('role')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                @elseif (Auth::user()->profile->role === 'Manager' )
+                    <div>
+                        <label for="role" class="block text-sm font-medium text-gray-700 mb-2">Role <span class="text-red-500">*</span></label>
+                        <select id="role" name="role"
+                            class="w-full border border-gray-200 rounded-lg px-4 py-2 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors @error('role') border-red-500 @enderror"
+                            required>
+                            <option value="" disabled>Select Role</option>
+                            @foreach (['User', 'Pharmacist'] as $roleOption)
                                 <option value="{{ $roleOption }}" {{ old('role', $profile->role ?? '') === $roleOption ? 'selected' : '' }}>{{ $roleOption }}</option>
                             @endforeach
                         </select>
@@ -36,28 +52,37 @@
                     </div>
                 @endif
 
-                @if (in_array(old('role', $profile->role ?? ''), ['Manager', 'Pharmacist']) || Auth::user()->profile->role === 'Admin')
+                {{-- Adjusted condition for pharmacy_id dropdown --}}
+                @if (Auth::user()->profile->role === 'Admin' || (Auth::user()->profile->role === 'Manager' && (old('role', $profile->role ?? '') === 'Pharmacist' || old('role') === 'Pharmacist' )))
                     <div>
                         <label for="pharmacy_id" class="block text-sm font-medium text-gray-700 mb-2">Pharmacy <span class="text-red-500">* (if Manager/Pharmacist)</span></label>
                         <select id="pharmacy_id" name="pharmacy_id"
                             class="w-full border border-gray-200 rounded-lg px-4 py-2 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors @error('pharmacy_id') border-red-500 @enderror"
-                            {{ Auth::user()->profile->role === 'Manager' && $profile->role === 'Pharmacist' && $profile->pharmacy_id == Auth::user()->profile->pharmacy_id ? '' : (Auth::user()->profile->role === 'Admin' ? '' : 'disabled') }} >
-                            <option value="">Select Pharmacy (if applicable)</option>
+                            {{ Auth::user()->profile->role === 'Manager' && Auth::user()->profile->pharmacy_id && !old('role') && $profile->role !== 'Pharmacist' ? 'disabled' : '' }}
+                            >
+                            <option value="">Select Pharmacy</option>
                             @foreach ($pharmacies as $pharmacy)
                                 <option value="{{ $pharmacy->id }}" {{ old('pharmacy_id', $profile->pharmacy_id ?? '') == $pharmacy->id ? 'selected' : '' }}>{{ $pharmacy->name }}</option>
                             @endforeach
                         </select>
-                        @if (Auth::user()->profile->role !== 'Admin' && !(Auth::user()->profile->role === 'Manager' && $profile->role === 'Pharmacist' && $profile->pharmacy_id == Auth::user()->profile->pharmacy_id))
+                        {{-- If the manager is editing a user that isn't a pharmacist, ensure the pharmacy_id is still submitted if it existed before --}}
+                        @if (Auth::user()->profile->role === 'Manager' && Auth::user()->profile->pharmacy_id && !old('role') && $profile->role !== 'Pharmacist')
                             @if($profile->pharmacy_id)
-                            <input type="hidden" name="pharmacy_id" value="{{ $profile->pharmacy_id }}">
+                                <input type="hidden" name="pharmacy_id" value="{{ $profile->pharmacy_id }}">
                             @endif
                         @endif
                         @error('pharmacy_id')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+                @elseif (Auth::user()->profile->role === 'Manager')
+                    {{-- If a Manager is editing a user who is NOT a Pharmacist, and they are not changing the role to Pharmacist --}}
+                    @if($profile->pharmacy_id)
+                        <input type="hidden" name="pharmacy_id" value="{{ $profile->pharmacy_id }}">
+                    @endif
                 @endif
-                
+
+
                 @include('profiles._profile_form_fields', ['profile' => $profile])
             </div>
 
@@ -75,43 +100,5 @@
         </form>
     </div>
 
-   @include('partials._geolocation_script') {{-- Assuming you have this from edit.blade.php --}}
+   @include('partials._geolocation_script')
 </x-dashboardLayout>
-
-{{-- Ensure your geolocation and image preview script is in a partial like 'partials._geolocation_script' --}}
-{{-- For example, create resources/views/partials/_geolocation_script.blade.php and paste the JS there --}}
-
-{{-- Example: resources/views/partials/_geolocation_script.blade.php --}}
-{{-- <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Geolocation logic from your original edit.blade.php
-    const latitudeField = document.getElementById('latitude');
-    // ... (rest of the geolocation script) ...
-    if (autoFillBtn) {
-        autoFillBtn.addEventListener('click', fillGeolocation);
-        // Optional: auto-fill on load if fields are empty and it's not an edit form with existing data
-        // Check if it's a create/assign form or an edit form with empty geo fields
-        let isEditFormWithGeoData = {{ (isset($profile) && ($profile->latitude || $profile->longitude)) ? 'true' : 'false' }};
-        if (!isEditFormWithGeoData && latitudeField && !latitudeField.value && longitudeField && !longitudeField.value) {
-            // fillGeolocation(); // Auto-fill only if desired for empty forms
-        }
-    }
-
-    // Image Preview logic
-    const pictureInput = document.getElementById('picture');
-    const picturePreview = document.getElementById('picturePreview');
-    if(pictureInput && picturePreview) {
-        pictureInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    picturePreview.src = event.target.result;
-                    picturePreview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-});
-</script> --}}

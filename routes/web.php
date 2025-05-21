@@ -83,9 +83,13 @@ Route::get('/dashboard', function () {
 
     if ($userProfile->role === 'Manager') {
         // $userProfile->pharmacy_id and $assignedPharmacy are guaranteed to be valid here
-        $pharmacyQuery->where('id', $userProfile->pharmacy_id); // For $totalPharmacies, it will be 1
+        // $pharmacyQuery->where('id', $userProfile->pharmacy_id); // For $totalPharmacies, it will be 1
         $productQuery->whereHas('inventories', fn($q) => $q->where('pharmacy_id', $userProfile->pharmacy_id));
         $profileQuery->where('pharmacy_id', $userProfile->pharmacy_id);
+        $quotationQuery->where('pharmacy_id', $userProfile->pharmacy_id);
+        $transQuery->where('pharmacy_id', $userProfile->pharmacy_id);
+        $inventoryQuery->where('pharmacy_id', $userProfile->pharmacy_id);
+
     }
     // Note: Admins see all data, so no additional filters on queries like $pharmacyQuery, $productQuery etc. by default.
 
@@ -103,11 +107,9 @@ Route::get('/dashboard', function () {
         case 'Admin':
             return view('dashboard.adminDashboard', compact('totalPharmacies', 'totalProducts', 'totalProfiles', 'totalUsers'));
         case 'Pharmacist':
-             // Pass the already fetched $assignedPharmacy model to the view
-             return view('dashboard.pharmacistDashboard', compact('totalInventories', 'totalProducts', 'assignedPharmacy'));
+             return view('dashboard.pharmacistDashboard', compact('totalPrescriptions', 'totalQuotations','totalTransactions', 'totalInventories', 'totalProducts', 'assignedPharmacy','totalProfiles'));
         case 'Manager':
-            // Pass the already fetched $assignedPharmacy model to the view
-            return view('dashboard.managerDashboard', compact('totalProfiles', 'totalProducts', 'assignedPharmacy'));
+            return view('dashboard.managerDashboard', compact('totalPrescriptions', 'totalQuotations','totalTransactions', 'totalInventories', 'totalProducts', 'assignedPharmacy','totalProfiles'));
         case 'User':
             return view('dashboard.patientDashboard', compact('totalPrescriptions', 'totalQuotations', 'totalTransactions'));
         default:

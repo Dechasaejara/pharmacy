@@ -11,7 +11,7 @@
                 <a href="{{ route('dashboard') }}" class="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold text-lg hover:bg-gray-100 transition duration-300 shadow-md w-full sm:w-auto">
                     <i class="fas fa-upload mr-2"></i> Upload Prescription
                 </a>
-                <a href="{{ route('pharmacies.index') }}" class="bg-emerald-700 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-emerald-800 transition duration-300 border border-emerald-400 w-full sm:w-auto">
+                <a href="{{ route('home') }}#map"class="bg-emerald-700 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-emerald-800 transition duration-300 border border-emerald-400 w-full sm:w-auto">
                     <i class="fas fa-map-marked-alt mr-2"></i> View Pharmacies on Map
                 </a>
             </div>
@@ -69,15 +69,13 @@
                         <li class="flex items-start"><i class="fas fa-dollar-sign text-green-500 fa-fw mr-3 mt-1"></i>Quickly see which pharmacies offer competitive pricing.</li>
                         <li class="flex items-start"><i class="fas fa-info-circle text-green-500 fa-fw mr-3 mt-1"></i>Access pharmacy contact info and opening hours.</li>
                     </ul>
-                    <a href="{{ route('pharmacies.index') }}" class="bg-green-500 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-green-600 transition duration-300 shadow-md">
+                    {{-- <a href="{{ route('pharmacies.index') }}" class="bg-green-500 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-green-600 transition duration-300 shadow-md">
                         <i class="fas fa-map-marked-alt mr-2"></i> Explore the Map
-                    </a>
+                    </a> --}}
                 </div>
-                <div class="lg:w-1/2">
-                    {{-- Placeholder for a static map image or an illustration --}}
-                    {{-- For a real implementation, you might use a screenshot of your map interface --}}
-                    <img src="{{ asset('images/static-map-placeholder.png') }}" alt="Map showing nearby pharmacies" class="rounded-lg shadow-xl mx-auto" style="max-height: 400px; object-fit: cover;">
-                    {{-- Make sure to have 'static-map-placeholder.png' in your 'public/images' directory --}}
+                <div id="map" class="lg:w-2/3 lg:ml-12 z-20">
+                    <x-map :quotations="[]" />
+                    
                 </div>
             </div>
         </div>
@@ -122,7 +120,7 @@
                         <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col">
                             <div class="h-48 w-full mb-4 rounded overflow-hidden">
                                 @if ($pharmacy->picture)
-                                    <img src="{{ asset('storage/' . $pharmacy->picture) }}" alt="{{ $pharmacy->name }}" class="w-full h-full object-cover">
+                                    <img   src="{{ asset('storage/' . $pharmacy->picture) }}" src="{{ asset('storage/' . $pharmacy->picture) }}" alt="{{ $pharmacy->name }}" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full bg-gray-200 flex items-center justify-center">
                                         <i class="fas fa-clinic-medical fa-4x text-gray-400"></i>
@@ -170,10 +168,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                 @foreach ($trendingProducts as $product)
                     <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col">
-                        <img src="{{ asset('storage/' . $product->picture) }}" alt="{{ $product->name }}"
-                            class="w-full h-40 object-contain rounded-md mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h3>
-                        <p class="text-green-600 font-bold text-xl my-2">${{ number_format($product->price, 2) }}</p>
+                        <h3 class="text-lg font-semibold text-gray-800">{{ $product->brand_name }}</h3>
+                        <img src="{{ asset('storage/' . $product->picture) }}" alt="{{ $product->brand_name }}"
+                            class="w-full h-40 object-contain p-1 border rounded-md mb-4">
+                       
+                        {{-- <p class="text-green-600 font-bold text-xl my-2">${{ number_format($product->price, 2) }}</p> --}}
                         <div class="mt-auto">
                             <a href="{{ route('products.index', $product) }}" class="inline-block bg-emerald-500 text-white px-5 py-2 rounded-md font-medium hover:bg-emerald-600 transition duration-300 text-sm w-full text-center">
                                 View Product
