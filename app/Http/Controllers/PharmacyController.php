@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pharmacy;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -51,9 +52,11 @@ class PharmacyController extends Controller
             $validated['picture'] = $request->file('picture')->store('pharmacies', 'public');
         }
 
-        Pharmacy::create(['profile_id' => Auth::user()->profile->id, ...$validated]);
-
-        return redirect()->route('pharmacies.index')->with('success', 'Pharmacy added successfully.');
+        $pharmacy = Pharmacy::create(['profile_id' => Auth::user()->profile->id, ...$validated]);
+        // $pharmacies = Pharmacy::all();
+        // $users = User::all();
+        return redirect()->route('profiles.assign', ['pharmacy_id' => $pharmacy->id])
+            ->with('success', 'Pharmacy added successfully.');
     }
 
     /**

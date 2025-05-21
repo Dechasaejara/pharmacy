@@ -13,6 +13,7 @@ class Profile extends Model
     use HasFactory;
     protected $fillable = [
         'user_id',
+        'pharmacy_id',
         'fullname',
         'bio',
         'picture',

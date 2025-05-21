@@ -53,9 +53,7 @@
                 <ul class="flex flex-col md:flex-row md:space-x-6 items-start md:items-center text-lg space-y-2 md:space-y-0">
                     <li><a href="{{ route('home') }}#how-it-works" @click="mobileMenuOpen = false" class="py-2 block hover:text-green-200 transition-colors">How It Works</a></li>
                     <li><a href="{{ route('home') }}#featured-pharmacies" @click="mobileMenuOpen = false" class="py-2 block hover:text-green-200 transition-colors">Partners</a></li>
-                    @if(Route::has('products.index'))
-                        <li><a href="{{ route('products.index') }}" @click="mobileMenuOpen = false" class="py-2 block hover:text-green-200 transition-colors">Products</a></li>
-                    @endif
+                    <li><a href="{{ route('home') }}#trending-products" @click="mobileMenuOpen = false" class="py-2 block hover:text-green-200 transition-colors">Products</a></li>
                 </ul>
 
                 <div class="flex flex-col md:flex-row gap-3 items-start md:items-center md:ml-6 mt-4 md:mt-0 border-t border-green-500 md:border-none pt-4 md:pt-0">
@@ -63,7 +61,7 @@
                         <div x-data="{ open: false }" class="relative">
                             <button @click="open = !open" @click.outside="open = false"
                                 class="flex items-center space-x-2 focus:outline-none text-white hover:text-green-200">
-                                @if (auth()->user()->profile->picture)
+                                @if (isset( auth()->user()->profile->picture))
                                     <img 
                                     src="{{ asset("storage/" . auth()->user()->profile->picture ) }}" alt="{{ auth()->user()->name }}" class="w-9 h-9 rounded-full border-2 border-green-300 object-cover">
                                 @else

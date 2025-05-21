@@ -4,11 +4,11 @@
         <h1 class="text-2xl font-bold text-gray-900 mb-6">Profile Management</h1>
 
         <!-- Add Profile Button -->
-        <div class="mb-4">
-            <a href="{{ route('profiles.create') }}" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+        {{-- <div class="mb-4">
+            <a href="{{ route('') }}" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
                 Add New Profile
             </a>
-        </div>
+        </div> --}}
 
         <!-- Profile Table -->
         <div class="overflow-x-auto bg-white shadow-md rounded">

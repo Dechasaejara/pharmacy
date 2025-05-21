@@ -175,7 +175,7 @@
                         <h3 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h3>
                         <p class="text-green-600 font-bold text-xl my-2">${{ number_format($product->price, 2) }}</p>
                         <div class="mt-auto">
-                            <a href="{{ route('products.show', $product) }}" class="inline-block bg-emerald-500 text-white px-5 py-2 rounded-md font-medium hover:bg-emerald-600 transition duration-300 text-sm w-full text-center">
+                            <a href="{{ route('products.index', $product) }}" class="inline-block bg-emerald-500 text-white px-5 py-2 rounded-md font-medium hover:bg-emerald-600 transition duration-300 text-sm w-full text-center">
                                 View Product
                             </a>
                         </div>
