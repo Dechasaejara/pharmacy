@@ -55,7 +55,7 @@
                 {{-- Adjusted condition for pharmacy_id dropdown --}}
                 @if (Auth::user()->profile->role === 'Admin' || (Auth::user()->profile->role === 'Manager' && (old('role', $profile->role ?? '') === 'Pharmacist' || old('role') === 'Pharmacist' )))
                     <div>
-                        <label for="pharmacy_id" class="block text-sm font-medium text-gray-700 mb-2">Pharmacy <span class="text-red-500">* (if Manager/Pharmacist)</span></label>
+                        <label for="pharmacy_id" class="block text-sm font-medium text-gray-700 mb-2">Pharmacy </label>
                         <select id="pharmacy_id" name="pharmacy_id"
                             class="w-full border border-gray-200 rounded-lg px-4 py-2 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors @error('pharmacy_id') border-red-500 @enderror"
                             {{ Auth::user()->profile->role === 'Manager' && Auth::user()->profile->pharmacy_id && !old('role') && $profile->role !== 'Pharmacist' ? 'disabled' : '' }}

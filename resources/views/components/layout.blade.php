@@ -114,7 +114,7 @@
         </div>
     @endif
 
-    <main class="flex-grow w-full my-4">
+    <main class="flex-grow w-full my-4 px-5">
         {{ $slot }}
     </main>
 

@@ -74,22 +74,17 @@ Route::get('/dashboard', function () {
         $transQuery->where('profile_id', $userProfile->id);
     }
 
-    if ($userProfile->role === 'Pharmacist') {
-        // $userProfile->pharmacy_id and $assignedPharmacy are guaranteed to be valid here
-        $inventoryQuery->where('pharmacy_id', $userProfile->pharmacy_id);
-        $pharmacyQuery->where('id', $userProfile->pharmacy_id); // For $totalPharmacies, it will be 1
-        $productQuery->whereHas('inventories', fn($q) => $q->where('pharmacy_id', $userProfile->pharmacy_id));
-    }
 
-    if ($userProfile->role === 'Manager') {
-        // $userProfile->pharmacy_id and $assignedPharmacy are guaranteed to be valid here
-        // $pharmacyQuery->where('id', $userProfile->pharmacy_id); // For $totalPharmacies, it will be 1
-        $productQuery->whereHas('inventories', fn($q) => $q->where('pharmacy_id', $userProfile->pharmacy_id));
-        $profileQuery->where('pharmacy_id', $userProfile->pharmacy_id);
+    if ($userProfile->role === 'Manager' || $userProfile->role === 'Pharmacist') {
+        $profileQuery->where('role', '!=', 'Admin')
+            ->where(function ($query) use ($userProfile) {
+                $query->where('pharmacy_id', $userProfile->pharmacy_id)
+                    ->orWhereNull('pharmacy_id');
+            });
+        // dd($profileQuery->get());Z
         $quotationQuery->where('pharmacy_id', $userProfile->pharmacy_id);
         $transQuery->where('pharmacy_id', $userProfile->pharmacy_id);
         $inventoryQuery->where('pharmacy_id', $userProfile->pharmacy_id);
-
     }
     // Note: Admins see all data, so no additional filters on queries like $pharmacyQuery, $productQuery etc. by default.
 
@@ -107,14 +102,14 @@ Route::get('/dashboard', function () {
         case 'Admin':
             return view('dashboard.adminDashboard', compact('totalPharmacies', 'totalProducts', 'totalProfiles', 'totalUsers'));
         case 'Pharmacist':
-             return view('dashboard.pharmacistDashboard', compact('totalPrescriptions', 'totalQuotations','totalTransactions', 'totalInventories', 'totalProducts', 'assignedPharmacy','totalProfiles'));
+            return view('dashboard.pharmacistDashboard', compact('totalPrescriptions', 'totalQuotations', 'totalTransactions', 'totalInventories', 'totalProducts', 'assignedPharmacy', 'totalProfiles'));
         case 'Manager':
-            return view('dashboard.managerDashboard', compact('totalPrescriptions', 'totalQuotations','totalTransactions', 'totalInventories', 'totalProducts', 'assignedPharmacy','totalProfiles'));
+            return view('dashboard.managerDashboard', compact('totalPrescriptions', 'totalQuotations', 'totalTransactions', 'totalInventories', 'totalProducts', 'assignedPharmacy', 'totalProfiles'));
         case 'User':
             return view('dashboard.patientDashboard', compact('totalPrescriptions', 'totalQuotations', 'totalTransactions'));
         default:
-             Auth::logout();
-             return redirect()->route('login')->with('error', 'Invalid role. Access denied.');
+            Auth::logout();
+            return redirect()->route('login')->with('error', 'Invalid role. Access denied.');
     }
 })->middleware(['auth'])->name('dashboard');
 

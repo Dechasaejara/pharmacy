@@ -17,7 +17,23 @@ class ProfileController extends Controller
 
     public function index()
     {
-        $profiles = Profile::with('user', 'pharmacy')->latest()->paginate(10);
+        $userProfile = Auth::user()->profile;
+
+        // Base query with eager loading
+        $profilesQuery = Profile::with('user', 'pharmacy')->latest();
+
+        // Apply role-based filters
+        if ($userProfile->role === 'Manager' || $userProfile->role === 'Pharmacist') {
+            $profilesQuery->where('role', '!=', 'Admin')
+                ->where(function ($query) use ($userProfile) {
+                    $query->where('pharmacy_id', $userProfile->pharmacy_id)
+                        ->orWhereNull('pharmacy_id');
+                });
+        }
+
+        // Paginate the results
+        $profiles = $profilesQuery->paginate(10);
+
         return view('profiles.index', ['profiles' => $profiles]);
     }
 
@@ -25,10 +41,10 @@ class ProfileController extends Controller
     {
 
         $eligibleUsers = User::whereDoesntHave('profile', function ($query) {
-            $query->whereIn('role', ['Manager', 'Pharmacist']); 
-        })->orWhereDoesntHave('profile') 
-          ->where('id', '!=', Auth::id()) 
-          ->orderBy('email')->get();
+            $query->whereIn('role', ['Manager', 'Pharmacist']);
+        })->orWhereDoesntHave('profile')
+            ->where('id', '!=', Auth::id())
+            ->orderBy('email')->get();
 
         return view('profiles.assign_role', [
             'targetPharmacy' => $pharmacy,
@@ -51,7 +67,7 @@ class ProfileController extends Controller
         if (!$managerProfile || $managerProfile->role !== 'Manager' || !$managerProfile->pharmacy_id) {
             // Admin might also access this, or it's strictly for managers.
             // If Admin, they might need to select a pharmacy first, or this route is manager-specific.
-             if ($managerProfile->role === 'Admin' && request()->has('pharmacy_id')) {
+            if ($managerProfile->role === 'Admin' && request()->has('pharmacy_id')) {
                 $pharmacy = Pharmacy::findOrFail(request('pharmacy_id'));
             } elseif ($managerProfile->role === 'Manager' && $managerProfile->pharmacy_id) {
                 $pharmacy = $managerProfile->pharmacy;
@@ -62,10 +78,10 @@ class ProfileController extends Controller
 
 
         $eligibleUsers = User::whereDoesntHave('profile', function ($query) {
-             $query->whereIn('role', ['Manager', 'Pharmacist']);
+            $query->whereIn('role', ['Manager', 'Pharmacist']);
         })->orWhereDoesntHave('profile')
-          ->where('id', '!=', Auth::id()) // Manager cannot assign themselves as pharmacist typically
-          ->orderBy('email')->get();
+            ->where('id', '!=', Auth::id()) // Manager cannot assign themselves as pharmacist typically
+            ->orderBy('email')->get();
 
         return view('profiles.assign_role', [
             'targetPharmacy' => $pharmacy,
@@ -115,8 +131,8 @@ class ProfileController extends Controller
 
         if ($request->hasFile('picture')) {
             // If there's an old picture for this user's profile, delete it
-            if($user->profile && $user->profile->picture) {
-                 Storage::disk('public')->delete($user->profile->picture);
+            if ($user->profile && $user->profile->picture) {
+                Storage::disk('public')->delete($user->profile->picture);
             }
             $profileData['picture'] = $request->file('picture')->store('profiles', 'public');
         }
@@ -183,14 +199,14 @@ class ProfileController extends Controller
         ]);
 
         // Prevent non-admins from escalating roles or changing critical fields without permission
-        if ($currentAuthUserRole !== 'Admin') {
-            unset($validated['role']); // Non-admins cannot change roles directly via general edit
-            // Potentially unset pharmacy_id too if manager shouldn't reassign widely
-             if ($currentAuthUserRole === 'Manager' && isset($validated['pharmacy_id']) && $validated['pharmacy_id'] != $profile->pharmacy_id) {
-                 // Manager might only be allowed to assign within their pharmacy or not at all via this form
-                 // This depends on stricter business rules. For now, if dropdown is shown, they can change.
-             }
-        }
+        // if ($currentAuthUserRole !== 'Admin') {
+        //     unset($validated['role']); // Non-admins cannot change roles directly via general edit
+        //     // Potentially unset pharmacy_id too if manager shouldn't reassign widely
+        //      if ($currentAuthUserRole === 'Manager' && isset($validated['pharmacy_id']) && $validated['pharmacy_id'] != $profile->pharmacy_id) {
+        //          // Manager might only be allowed to assign within their pharmacy or not at all via this form
+        //          // This depends on stricter business rules. For now, if dropdown is shown, they can change.
+        //      }
+        // }
 
 
         $oldPicture = $profile->picture;
@@ -213,7 +229,6 @@ class ProfileController extends Controller
                 return redirect()->route('dashboard')->with('success', 'Your profile updated successfully.');
             }
             return redirect()->route('profiles.index')->with('success', 'Profile updated successfully.');
-
         } catch (\Exception $e) {
             if ($request->hasFile('picture') && isset($validated['picture'])) {
                 Storage::disk('public')->delete($validated['picture']);

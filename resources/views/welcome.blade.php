@@ -1,5 +1,5 @@
 <x-layout>
-    <section class="bg-gradient-to-r from-green-500 to-emerald-600 text-white py-20 lg:py-32">
+    <section class="bg-gradient-to-b from-green-500/95 to-emerald-600/95 text-white py-20 lg:py-32 ">
         <div class="container mx-auto px-6 text-center">
             <h1 class="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
                 Welcome to {{ config('app.name', 'PharmaConnect') }}

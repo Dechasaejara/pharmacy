@@ -61,10 +61,10 @@ class TransactionController extends Controller
 
         try {
             // Ensure the quotation belongs to the authenticated user's profile
-            $quotation = Quotation::findOrFail($validated['quotation_id']);
-            if (Auth::user()->profile->id !== $quotation->profile_id) {
-                return redirect()->back()->withErrors(['quotation_id' => 'You are not authorized to use this quotation.']);
-            }
+            // $quotation = Quotation::findOrFail($validated['quotation_id']);
+            // if (Auth::user()->profile->id !== $quotation->profile_id) {
+            //     return redirect()->back()->withErrors(['quotation_id' => 'You are not authorized to use this quotation.']);
+            // }
 
             $transaction = Transaction::create($validated);
             // dd($transaction);
